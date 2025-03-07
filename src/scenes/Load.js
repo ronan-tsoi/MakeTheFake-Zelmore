@@ -21,12 +21,11 @@ class Load extends Phaser.Scene {
     }
     create() {
         this.anims.create({
-            key: 'boss-stomp',
-            frameRate: 4,
-            repeat: -1,
+            key: 'boss-attack',
+            frameRate: 8,
+            repeat: 0,
             frames: this.anims.generateFrameNumbers('boss', {
-                start: 0,
-                end: 1
+                frames: [1,1,1,0]
             })
         })
         this.anims.create({
@@ -35,6 +34,22 @@ class Load extends Phaser.Scene {
             repeat: 0,
             frames: this.anims.generateFrameNumbers('player', {
                 frames: [0,1,2]
+            })
+        })
+        this.anims.create({
+            key: 'player-squashed',
+            frameRate: 8,
+            repeat: 0,
+            frames: this.anims.generateFrameNumbers('player', {
+                frames: [3]
+            })
+        })
+        this.anims.create({
+            key: 'player-idle',
+            frameRate: 8,
+            repeat: 0,
+            frames: this.anims.generateFrameNumbers('player', {
+                frames: [0]
             })
         })
 

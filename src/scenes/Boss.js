@@ -29,13 +29,16 @@ class Boss extends Phaser.Scene {
         this.boss.body.setCollideWorldBounds(true)
         this.bossHealth = 15
         this.bossVulnerable = false
+        this.bossAttacking = false
         //boss.play('boss-stomp')
+        this.inRangeCheck = false
 
         //player
         player = this.physics.add.sprite(120, height-38, 'player').setOrigin(0,1).setScale(4)
         player.body.setCollideWorldBounds(true)
         this.inAir = false
         this.maxJumpVelocity = false
+        this.playerHealth = 6
 
         this.playerX = 0
         this.playerY = 0
@@ -97,21 +100,22 @@ class Boss extends Phaser.Scene {
             }
         }
 
-        /*if(this.input.keyboard.checkDown(cursors.attack, 1000)) {
-            player.anims.play(`player-attack`)
-            player.once('animationcomplete', () => {
-                player.anims.play(`player-attack`)
-                player.anims.stop()
-        })
+        /*if (this.bossAttacking) {
+            this.bossAttacking = false
+            this.boss.anims.play('boss-attack')
         }*/
         
 
         this.physics.world.collide(player, this.ground, this.onGround, null, this)
         this.physics.world.overlap(player, this.boss, this.inRange, null, this)
+        if (!this.bossAttacking && !this.attacking) {
+            player.anims.play('player-idle')
+            this.inRangeCheck = false
+        }
 
         player.setVelocity(this.PLAYER_VELOCITY * this.playerX, this.PLAYER_VELOCITY * this.playerY)
         
-        this.debug.text = this.inAir + ' ' + this.maxJumpVelocity + ' ' + this.bossHealth + ' '
+        this.debug.text = this.bossAttacking + ' ' + this.maxJumpVelocity + ' ' + this.bossHealth + ' ' + this.playerHealth
     }
 
     onGround() {
@@ -131,6 +135,14 @@ class Boss extends Phaser.Scene {
             if (!this.bossVulnerable) {
                 this.boss.setTint(0xFFFFFF)
             }
+        }
+        if (!this.bossVulnerable && !this.bossAttacking) {
+            this.bossAttacking = true
+            this.boss.anims.play('boss-attack')
+            this.boss.once('animationcomplete', () => {
+                player.anims.play('player-squashed')
+                this.bossAttacking = false
+            })
         }
         
     }
