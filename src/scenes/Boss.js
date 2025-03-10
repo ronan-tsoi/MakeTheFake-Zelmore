@@ -27,7 +27,7 @@ class Boss extends Phaser.Scene {
         //boss
         this.boss = this.physics.add.sprite(280, height-38, 'boss', 0).setOrigin(0,1).setScale(4)
         this.boss.body.setCollideWorldBounds(true)
-        this.bossHealth = 15
+        this.bossHealth = 12
         this.bossVulnerable = false
         this.bossAttacking = false
         //boss.play('boss-stomp')
@@ -43,6 +43,7 @@ class Boss extends Phaser.Scene {
         this.playerX = 0
         this.playerY = 0
 
+        this.health = this.add.sprite(20,20, 'hearts-6').setOrigin(0,0).setScale(4)
         this.playerHealth = 6
 
         this.cooldown = false
@@ -52,6 +53,7 @@ class Boss extends Phaser.Scene {
                 this.cooldown = true
                 this.attacking = true
                 player.anims.play(`player-attack`)
+                this.sound.play('attack')
                 player.once('animationcomplete', () => {
                     this.cooldown = false
                     this.attacking = false
@@ -62,8 +64,17 @@ class Boss extends Phaser.Scene {
         })
 
 
-        this.add.text(10, 10, 'boss scene', textConfig)
+        //this.add.text(10, 10, 'boss scene', textConfig)
         this.debug = this.add.text(10, 50, '', textConfig)
+        this.tip = this.add.text(10, height-30, 'Tip: only the boss\'s head is vulnerable!', {
+            fontFamily: 'Courier',
+            fontSize: '18px',
+            color: '#FFFFFF',
+            padding: {
+                top: 5,
+                bottom: 5,
+            }
+        })
 
     }
     update() {
@@ -109,13 +120,14 @@ class Boss extends Phaser.Scene {
         this.physics.world.collide(player, this.ground, this.onGround, null, this)
         this.physics.world.overlap(player, this.boss, this.inRange, null, this)
         if (!this.bossAttacking && !this.attacking) {
-            player.anims.play('player-idle')
+            //player.anims.play('player-idle')
             this.inRangeCheck = false
         }
 
         player.setVelocity(this.PLAYER_VELOCITY * this.playerX, this.PLAYER_VELOCITY * this.playerY)
         
-        this.debug.text = this.bossAttacking + ' ' + this.maxJumpVelocity + ' ' + this.bossHealth + ' ' + this.playerHealth
+        //this.debug.text = this.bossAttacking + ' ' + this.maxJumpVelocity + ' ' + this.bossHealth + ' ' + this.playerHealth
+        this.debug.text = 'Boss Health: ' + this.bossHealth
     }
 
     onGround() {
@@ -128,22 +140,38 @@ class Boss extends Phaser.Scene {
         //console.log('in attack range')
         if (this.bossVulnerable && this.attacking) {
             //console.log('hurt boss')
-            this.boss.setTint(0xFF8888)
+            //this.boss.setTint(0xFF8888)
+            this.sound.play('hit')
             this.bossHealth--
             this.attacking = false
+            if (this.bossHealth == 0) {
+                this.scene.start('winScene')
+            }
         } else {
             if (!this.bossVulnerable) {
-                this.boss.setTint(0xFFFFFF)
+                //this.boss.setTint(0xFFFFFF)
             }
         }
         if (!this.bossVulnerable && !this.bossAttacking) {
             this.bossAttacking = true
             this.boss.anims.play('boss-attack')
             this.boss.once('animationcomplete', () => {
-                player.anims.play('player-squashed')
+                this.physics.world.overlap(player, this.boss, this.landing, null, this)
+                //player.anims.play('player-squashed')
                 this.bossAttacking = false
             })
         }
         
+    }
+    landing() {
+        this.playerHealth--
+        this.sound.play('stomp')
+        player.anims.play('player-squashed')
+        if (this.playerHealth == 0) {
+            this.scene.start('gameOverScene')
+        }
+        else {
+            this.health.setTexture('hearts-'+this.playerHealth)
+        }
     }
 }

@@ -14,10 +14,20 @@ class Load extends Phaser.Scene {
             frameWidth: 88,
             frameHeight: 77
         })
-        this.load.spritesheet('heart', './assets/img/heart.png', {
+        /*this.load.spritesheet('heart', './assets/img/heart.png', {
             frameWidth: 9,
             frameHeight: 8
-        })
+        })*/
+        this.load.image('hearts-1', './assets/img/hearts-1.png')
+        this.load.image('hearts-2', './assets/img/hearts-2.png')
+        this.load.image('hearts-3', './assets/img/hearts-3.png')
+        this.load.image('hearts-4', './assets/img/hearts-4.png')
+        this.load.image('hearts-5', './assets/img/hearts-5.png')
+        this.load.image('hearts-6', './assets/img/hearts-6.png')
+
+        this.load.audio('attack', './assets/audio/attack.wav')
+        this.load.audio('stomp', './assets/audio/stomp.wav')
+        this.load.audio('hit', './assets/audio/hit.wav')
     }
     create() {
         this.anims.create({
