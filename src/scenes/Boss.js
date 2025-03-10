@@ -14,7 +14,7 @@ class Boss extends Phaser.Scene {
             left:Phaser.Input.Keyboard.KeyCodes.A,
             right:Phaser.Input.Keyboard.KeyCodes.D,
             space:Phaser.Input.Keyboard.KeyCodes.SPACE,
-            attack:Phaser.Input.Keyboard.KeyCodes.K
+            attack:Phaser.Input.Keyboard.KeyCodes.K,
         })
 
         //bg
@@ -75,6 +75,21 @@ class Boss extends Phaser.Scene {
                 bottom: 5,
             }
         })
+        this.controls = this.add.text(width-200, 10, 'A/D move\nSPACE jump\nLEFT CLICK attack\n\nH toggle debug', {
+            fontFamily: 'Courier',
+            fontSize: '18px',
+            color: '#FFFFFF',
+            padding: {
+                top: 5,
+                bottom: 5,
+            }
+        })
+        this.keys = this.input.keyboard.createCursorKeys()
+        this.keys.HKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.H)
+        this.input.keyboard.on('keydown-H', function() {
+            this.physics.world.drawDebug = this.physics.world.drawDebug ? false : true
+            this.physics.world.debugGraphic.clear()
+        }, this)
 
     }
     update() {
@@ -145,7 +160,10 @@ class Boss extends Phaser.Scene {
             this.bossHealth--
             this.attacking = false
             if (this.bossHealth == 0) {
-                this.scene.start('winScene')
+                this.boss.destroy()
+                this.time.delayedCall(1500, () => {
+                    this.scene.start('winScene')
+                })
             }
         } else {
             if (!this.bossVulnerable) {

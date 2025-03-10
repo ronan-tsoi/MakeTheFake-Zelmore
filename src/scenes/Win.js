@@ -3,7 +3,7 @@ class Win extends Phaser.Scene {
         super('winScene')
     }
     create() {
-        this.add.text(width/2, height/2, 'you win!\nspace to title', textConfig)
+        this.add.text(width/2, height/2, 'you win!\nSPACE to title', textConfig)
         keySPACE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
     }
     update() {

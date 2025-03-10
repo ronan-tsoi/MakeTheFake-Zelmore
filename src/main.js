@@ -22,7 +22,7 @@ let game = new Phaser.Game(config)
 
 let keyLEFT, keyRIGHT, keySPACE
 let cursors
-let { height, width } = game.config
+let { height, width , debug} = game.config
 
 let player
 
