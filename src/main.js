@@ -15,7 +15,7 @@ let config = {
             debug: true
         }
     },
-    scene: [ Load , Title , Boss , GameOver , Win]
+    scene: [ Load , Title , Play , GameOver]
 }
 
 let game = new Phaser.Game(config)
@@ -24,7 +24,8 @@ let keyLEFT, keyRIGHT, keySPACE
 let cursors
 let { height, width , debug} = game.config
 
-let player
+let hero
+let boss
 
 let textConfig = {
     fontFamily: 'Courier',

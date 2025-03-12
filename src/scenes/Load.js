@@ -3,21 +3,30 @@ class Load extends Phaser.Scene {
         super('loadScene')
     }
     preload() {
+        this.load.image('title-0', './assets/img/title-bg0.png')
+        this.load.image('title-1', './assets/img/title-bg1.png')
+        this.load.image('title-2', './assets/img/title-bg2.png')
+        this.load.image('title-3', './assets/img/title-bg3.png')
+
+        this.load.image('zelmore-title', './assets/img/title.png')
+        this.load.spritesheet('start-cue', './assets/img/start-cue.png', {
+            frameWidth: 63,
+            frameHeight: 19
+        })
+
         this.load.image('sky', './assets/img/bg-sky.png')
+        this.load.image('trees', './assets/img/bg-sky-treesonly.png')
         this.load.image('walls', './assets/img/bg-walls.png')
         this.load.image('ground', './assets/img/ground.png')
-        this.load.spritesheet('player', './assets/img/player.png', {
+        this.load.spritesheet('hero', './assets/img/hero.png', {
             frameWidth: 21,
-            frameHeight: 20
+            frameHeight: 21
         })
         this.load.spritesheet('boss', './assets/img/boss.png', {
             frameWidth: 88,
             frameHeight: 77
         })
-        /*this.load.spritesheet('heart', './assets/img/heart.png', {
-            frameWidth: 9,
-            frameHeight: 8
-        })*/
+
         this.load.image('hearts-1', './assets/img/hearts-1.png')
         this.load.image('hearts-2', './assets/img/hearts-2.png')
         this.load.image('hearts-3', './assets/img/hearts-3.png')
@@ -28,6 +37,7 @@ class Load extends Phaser.Scene {
         this.load.audio('attack', './assets/audio/attack.wav')
         this.load.audio('stomp', './assets/audio/stomp.wav')
         this.load.audio('hit', './assets/audio/hit.wav')
+
     }
     create() {
         this.anims.create({
@@ -39,27 +49,51 @@ class Load extends Phaser.Scene {
             })
         })
         this.anims.create({
-            key: 'player-attack',
+            key: 'boss-walk',
+            frameRate: 6,
+            repeat: 0,
+            frames: this.anims.generateFrameNumbers('boss', {
+                frames: [2,3]
+            })
+        })
+        this.anims.create({
+            key: 'hero-attack',
             frameRate: 8,
             repeat: 0,
-            frames: this.anims.generateFrameNumbers('player', {
+            frames: this.anims.generateFrameNumbers('hero', {
                 frames: [0,1,2]
             })
         })
         this.anims.create({
-            key: 'player-squashed',
+            key: 'hero-squashed',
             frameRate: 8,
             repeat: 0,
-            frames: this.anims.generateFrameNumbers('player', {
+            frames: this.anims.generateFrameNumbers('hero', {
                 frames: [3]
             })
         })
         this.anims.create({
-            key: 'player-idle',
+            key: 'hero-idle',
             frameRate: 8,
             repeat: 0,
-            frames: this.anims.generateFrameNumbers('player', {
+            frames: this.anims.generateFrameNumbers('hero', {
                 frames: [0]
+            })
+        })
+        this.anims.create({
+            key: 'hero-walk',
+            frameRate: 12,
+            repeat: 0,
+            frames: this.anims.generateFrameNumbers('hero', {
+                frames: [4,4,5,6,6,0]
+            })
+        })
+        this.anims.create({
+            key: 'cue-blink',
+            frameRate: 8,
+            repeat: 3,
+            frames: this.anims.generateFrameNumbers('start-cue', {
+                frames: [0,1]
             })
         })
 
