@@ -26,7 +26,9 @@ class Load extends Phaser.Scene {
             frameWidth: 88,
             frameHeight: 77
         })
+        this.load.image('fireball', './assets/img/fireball.png')
 
+        this.load.image('hearts-0', './assets/img/hearts-0.png')
         this.load.image('hearts-1', './assets/img/hearts-1.png')
         this.load.image('hearts-2', './assets/img/hearts-2.png')
         this.load.image('hearts-3', './assets/img/hearts-3.png')
@@ -34,9 +36,16 @@ class Load extends Phaser.Scene {
         this.load.image('hearts-5', './assets/img/hearts-5.png')
         this.load.image('hearts-6', './assets/img/hearts-6.png')
 
+        this.load.image('heart-2', './assets/img/heart-2.png')
+        this.load.image('heart-1', './assets/img/heart-1.png')
+        this.load.image('heart-0', './assets/img/heart-0.png')
+
         this.load.audio('attack', './assets/audio/attack.wav')
         this.load.audio('stomp', './assets/audio/stomp.wav')
         this.load.audio('hit', './assets/audio/hit.wav')
+
+        this.load.bitmapFont('upheaval', './assets/font/Upheaval.png', './assets/font/Upheaval.xml')
+        this.load.bitmapFont('gem', './assets/font/gem.png', './assets/font/gem.xml')
 
     }
     create() {

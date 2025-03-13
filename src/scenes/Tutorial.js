@@ -70,7 +70,7 @@ class Tutorial extends Phaser.Scene {
     }
     update() {
 
-        if (cursors.A.isDown) {
+        /*if (cursors.A.isDown) {
             this.heroX = -1
             hero.setFlipX(true)
             hero.anims.play('hero-walk', true)
@@ -102,7 +102,7 @@ class Tutorial extends Phaser.Scene {
             boss.anims.play('boss-walk', true)
         } else {
             this.bossX = 0
-        }
+        }*/
 
         if (this.inAir) {
             this.heroY += 0.1

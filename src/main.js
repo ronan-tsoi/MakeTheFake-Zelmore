@@ -15,7 +15,7 @@ let config = {
             debug: true
         }
     },
-    scene: [ Load , Title , Play , GameOver]
+    scene: [ Load , Title , Play , GameOver, Credits, SuddenDeath]
 }
 
 let game = new Phaser.Game(config)
@@ -26,6 +26,10 @@ let { height, width , debug} = game.config
 
 let hero
 let boss
+
+let player
+let time
+let healthbonus
 
 let textConfig = {
     fontFamily: 'Courier',

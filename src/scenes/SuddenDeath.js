@@ -1,11 +1,10 @@
-class Play extends Phaser.Scene {
+class SuddenDeath extends Phaser.Scene {
     constructor() {
-        super('playScene')
+        super('suddenDeathScene')
     }
     init() {
         this.HERO_VELOCITY = 450
         this.BOSS_VELOCITY = 300
-        this.TIMELIMIT = 30000
     }
     create() {
 
@@ -36,14 +35,24 @@ class Play extends Phaser.Scene {
         //boss
         boss = this.physics.add.sprite(width-380, height-38, 'boss', 0).setOrigin(0,1).setScale(4)
         boss.body.setCollideWorldBounds(true)
-        this.bossHealth = 12
         this.bossVulnerable = false
         this.bossAttacking = false
-        //boss.play('boss-stomp')
         this.inRangeCheck = false
 
         this.bossX = 0
         this.bossY = 0
+
+        this.bossHeart = this.add.sprite(width-20,20, 'heart-2').setOrigin(1,0).setScale(6)
+        this.bossHealth = 2
+        this.bossLowHealthTween = this.tweens.add({
+            targets: this.bossHeart,
+            duration: 50,
+            repeat: -1,
+            paused: true,
+            yoyo: true,
+            x: width-24
+
+        })
 
         this.input.keyboard.on('keydown-DOWN', () => {
             this.bossX = 0
@@ -80,15 +89,14 @@ class Play extends Phaser.Scene {
         hero.body.setCollideWorldBounds(true)
         this.inAir = false
         this.maxJumpVelocity = false
-        this.heroHealth = 6
 
         this.heroX = 0
         this.heroY = 0
 
-        this.health = this.add.sprite(20,20, 'hearts-6').setOrigin(0,0).setScale(4)
-        this.heroHealth = 6
-        this.lowHealthTween = this.tweens.add({
-            targets: this.health,
+        this.heroHeart = this.add.sprite(20,20, 'heart-2').setOrigin(0,0).setScale(6)
+        this.heroHealth = 2
+        this.heroLowHealthTween = this.tweens.add({
+            targets: this.heroHeart,
             duration: 50,
             repeat: -1,
             paused: true,
@@ -114,35 +122,11 @@ class Play extends Phaser.Scene {
         }
         })
 
-        this.clock = this.time.delayedCall(this.TIMELIMIT, () => {
-            this.scene.start('suddenDeathScene')
-        }, null, this)
-        this.timerDisplay = this.add.bitmapText(width/2, 30, 'upheaval', '', 72, 1).setOrigin(0.5)
-
-
-        //this.add.text(10, 10, 'boss scene', textConfig)
-        this.showDebugText = true
-        this.debug = this.add.text(10, 50, '', textConfig)
-        this.controls = this.add.text(width-200, 10, 'H toggle debug', {
-            fontFamily: 'Courier',
-            fontSize: '18px',
-            color: '#FFFFFF',
-            padding: {
-                top: 5,
-                bottom: 5,
-            }
-        })
-        this.keys = this.input.keyboard.createCursorKeys()
-        this.keys.HKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.H)
-        this.input.keyboard.on('keydown-H', function() {
-            this.showDebugText = this.showDebugText ? false : true
-            this.physics.world.drawDebug = this.physics.world.drawDebug ? false : true
-            this.physics.world.debugGraphic.clear()
-        }, this)
+        this.display = this.add.bitmapText(width/2, 30, 'upheaval', 'SUDDEN DEATH!', 72, 1).setOrigin(0.5)
 
     }
     update() {
-        this.bgsky.tilePositionX += 0.2
+        this.bgsky.tilePositionX -= 0.2
 
         //hero controls
         if (cursors.A.isDown) {
@@ -211,16 +195,6 @@ class Play extends Phaser.Scene {
         if (this.fireball) {
             this.fireball.update()
         }
-
-        this.countdown = (this.TIMELIMIT/1000) - Math.round(this.clock.getElapsed()/1000)
-        this.timerDisplay.text = this.countdown
-        
-        //this.debug.text = this.bossAttacking + ' ' + this.maxJumpVelocity + ' ' + this.bossHealth + ' ' + this.heroHealth
-        if (this.showDebugText) {
-            this.debug.text = this.bossHealth + '\n' + this.heroHealth
-        } else {
-            this.debug.text = ''
-        }
     }
 
     onGround() {
@@ -237,17 +211,21 @@ class Play extends Phaser.Scene {
             this.bossHealth--
             this.attacking = false
             if (this.bossHealth == 0) {
+                this.bossHeart.setTexture('heart-0')
                 this.cameras.main.shake(600, .02)
                 boss.alpha = 0
                 player = 'HERO'
-                time = (this.TIMELIMIT/1000) - Math.round(this.clock.getElapsed()/1000)
-                healthbonus = this.heroHealth*2
+                time = 1
+                healthbonus = this.heroHealth
                 this.time.delayedCall(1000, () => {
                     this.scene.start('gameOverScene')
                 })
             }
         } else {
-            if (!this.bossVulnerable) {
+            this.bossHeart.setTexture('heart-'+this.bossHealth)
+            if (this.bossHealth == 1) {
+                this.bossLowHealthTween.restart()
+                this.bossHeart.x = width-20
             }
         }
         //boss attack
@@ -268,21 +246,21 @@ class Play extends Phaser.Scene {
         this.sound.play('stomp')
         hero.anims.play('hero-squashed')
         if (this.heroHealth <= 0) {
-            this.health.setTexture('hearts-0')
+            this.heroHeart.setTexture('heart-0')
             this.cameras.main.shake(600, .02)
             hero.alpha = 0
             player = 'BOSS'
-            time = (this.TIMELIMIT/1000) - Math.round(this.clock.getElapsed()/1000)
+            time = 1
             healthbonus = this.bossHealth
             this.time.delayedCall(1000, () => {
                 this.scene.start('gameOverScene')
             })
         }
         else {
-            this.health.setTexture('hearts-'+this.heroHealth)
+            this.heroHeart.setTexture('heart-'+this.heroHealth)
             if (this.heroHealth == 1) {
-                this.lowHealthTween.restart()
-                this.health.x = 20
+                this.heroLowHealthTween.restart()
+                this.heroHeart.x = 20
             }
         }
     }
