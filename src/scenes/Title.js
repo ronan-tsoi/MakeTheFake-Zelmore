@@ -33,7 +33,11 @@ class Title extends Phaser.Scene {
         if (Phaser.Input.Keyboard.JustDown(keySPACE)) {
             this.cue.anims.play('cue-blink')
             this.cue.once('animationcomplete', () => {
-                this.scene.start('playScene')
+                this.cue.anims.play('cue-blink')
+                this.cue.anims.stop()
+                this.time.delayedCall(1000, () => {
+                    this.scene.start('playScene')
+                })
             })
         }
 

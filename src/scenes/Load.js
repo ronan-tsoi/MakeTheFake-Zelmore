@@ -99,8 +99,8 @@ class Load extends Phaser.Scene {
         })
         this.anims.create({
             key: 'cue-blink',
-            frameRate: 8,
-            repeat: 3,
+            frameRate: 10,
+            repeat: 2,
             frames: this.anims.generateFrameNumbers('start-cue', {
                 frames: [0,1]
             })

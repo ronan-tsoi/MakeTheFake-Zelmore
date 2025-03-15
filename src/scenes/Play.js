@@ -4,8 +4,8 @@ class Play extends Phaser.Scene {
     }
     init() {
         this.HERO_VELOCITY = 450
-        this.BOSS_VELOCITY = 300
-        this.TIMELIMIT = 30000
+        this.BOSS_VELOCITY = 250
+        this.TIMELIMIT = 3000
     }
     create() {
 
@@ -35,7 +35,13 @@ class Play extends Phaser.Scene {
         
         //boss
         boss = this.physics.add.sprite(width-380, height-38, 'boss', 0).setOrigin(0,1).setScale(4)
+        //compound body
+        this.bossHead = this.physics.add.sprite(boss.x + 104, boss.y-190).setOrigin(0,1)
+        this.bossHead.setSize(240, 140)
         boss.body.setCollideWorldBounds(true)
+        this.bossBody = this.physics.add.sprite(boss.x + 180, boss.y-84).setOrigin(0,1)
+        this.bossBody.setSize(260, 200)
+        this.bossGroup = this.add.group([this.bossHead, this.bossBody])
         this.bossHealth = 12
         this.bossVulnerable = false
         this.bossAttacking = false
@@ -56,7 +62,7 @@ class Play extends Phaser.Scene {
                     }
                     //this.cameras.main.shake(300, .004)
                     if (!this.bossVulnerable) {
-                        this.physics.world.overlap(hero, boss, this.landing, null, this)
+                        this.physics.world.overlap(this.heroBody, boss, this.landing, null, this)
                     }
                     //this.physics.world.overlap(hero, boss, this.landing, null, this)
                     //hero.anims.play('hero-squashed')
@@ -77,6 +83,11 @@ class Play extends Phaser.Scene {
 
         //hero
         hero = this.physics.add.sprite(120, height-38, 'hero').setOrigin(0,1).setScale(4)
+        //compound body
+        this.heroBody = this.physics.add.sprite(hero.x+12, hero.y-26).setOrigin(0,1)
+        this.heroBody.setSize(56,80)
+        this.heroAttackRange = this.physics.add.sprite(hero.x+32, hero.y-18).setOrigin(0,1)
+        this.heroAttackRange.setSize(74,44)
         hero.body.setCollideWorldBounds(true)
         this.inAir = false
         this.maxJumpVelocity = false
@@ -148,11 +159,15 @@ class Play extends Phaser.Scene {
         if (cursors.A.isDown) {
             this.heroX = -1
             hero.setFlipX(true)
-            hero.anims.play('hero-walk', true)
+            if (!this.attacking) {
+                hero.anims.play('hero-walk', true)
+            }
         } else if (cursors.D.isDown) {
             this.heroX = 1
             hero.setFlipX(false)
-            hero.anims.play('hero-walk', true)
+            if (!this.attacking) {
+                hero.anims.play('hero-walk', true)
+            }
         } else {
             this.heroX = 0
         }
@@ -171,11 +186,9 @@ class Play extends Phaser.Scene {
             this.heroY += 0.1
 
             if (hero.y < 250) {
-                //this.boss.setTint(0x00FF00)
                 this.bossVulnerable = true
             }
             else {
-                //this.boss.setTint(0xFFFFFF)
                 this.bossVulnerable = false
             }
         }
@@ -199,14 +212,35 @@ class Play extends Phaser.Scene {
         }
 
         this.physics.world.collide(hero, this.ground, this.onGround, null, this)
-        this.physics.world.overlap(hero, boss, this.inRange, null, this)
+        this.physics.world.overlap(this.heroAttackRange, this.bossGroup, this.heroAttack, null, this)
         if (!this.bossAttacking && !this.attacking) {
-            //hero.anims.play('hero-idle')
             this.inRangeCheck = false
         }
 
         hero.setVelocity(this.HERO_VELOCITY * this.heroX, this.HERO_VELOCITY * this.heroY)
+        this.heroBody.setVelocity(this.HERO_VELOCITY * this.heroX, this.HERO_VELOCITY * this.heroY)
+        this.heroAttackRange.setVelocity(this.HERO_VELOCITY * this.heroX, this.HERO_VELOCITY * this.heroY)
+        if (hero.flipX) {
+            this.heroBody.x = hero.x+40
+            this.heroAttackRange.x = hero.x+20
+            this.heroBody.y = hero.y-26
+            this.heroAttackRange.y = hero.y-18
+        } else {
+            this.heroBody.x = hero.x+12
+            this.heroAttackRange.x = hero.x+32
+            this.heroBody.y = hero.y-26
+            this.heroAttackRange.y = hero.y-18
+        }
         boss.setVelocity(this.BOSS_VELOCITY * this.bossX, this.HERO_VELOCITY * this.bossY)
+        this.bossHead.setVelocity(this.BOSS_VELOCITY * this.bossX, this.HERO_VELOCITY * this.bossY)
+        this.bossBody.setVelocity(this.BOSS_VELOCITY * this.bossX, this.HERO_VELOCITY * this.bossY)
+        if (boss.flipX) {
+            this.bossHead.x = boss.x + 216
+            this.bossBody.x = boss.x + 138
+        } else {
+            this.bossHead.x = boss.x + 104
+            this.bossBody.x = boss.x + 180
+        }
 
         if (this.fireball) {
             this.fireball.update()
@@ -228,9 +262,11 @@ class Play extends Phaser.Scene {
         this.maxJumpVelocity = false
         this.heroY = 0
         hero.y = height-36
+        //this.heroBody.y = hero.y-26
+        //this.heroAttackRange.y = hero.y-18
     }
 
-    inRange() {
+    /*inRange() {
         //player attack
         if (this.bossVulnerable && this.attacking) {
             this.sound.play('hit')
@@ -246,12 +282,9 @@ class Play extends Phaser.Scene {
                     this.scene.start('gameOverScene')
                 })
             }
-        } else {
-            if (!this.bossVulnerable) {
-            }
-        }
+        } 
         //boss attack
-        /*if (!this.bossVulnerable && !this.bossAttacking) {
+        if (!this.bossVulnerable && !this.bossAttacking) {
             this.bossAttacking = true
             boss.anims.play('boss-attack')
             boss.once('animationcomplete', () => {
@@ -260,13 +293,40 @@ class Play extends Phaser.Scene {
                 //hero.anims.play('hero-squashed')
                 this.bossAttacking = false
             })
-        }*/
+        }
         
+    }*/
+    heroAttack() {
+        //player attack
+        if (this.attacking) {
+            hero.anims.play(`hero-attack`)
+            this.sound.play('hit')
+            this.bossHealth--
+            boss.setTint(0xFF6666)
+            this.time.delayedCall(250, () => {
+                boss.setTint(0XFFFFFF)
+            })
+            this.attacking = false
+            if (this.bossHealth == 0) {
+                this.cameras.main.shake(600, .02)
+                boss.alpha = 0
+                player = 'HERO'
+                time = (this.TIMELIMIT/1000) - Math.round(this.clock.getElapsed()/1000)
+                healthbonus = this.heroHealth*2
+                this.time.delayedCall(1000, () => {
+                    this.scene.start('gameOverScene')
+                })
+            }
+        } 
     }
     landing() {
         this.heroHealth--
         this.sound.play('stomp')
-        hero.anims.play('hero-squashed')
+        hero.anims.play('hero-squashed', true)
+        hero.setTint(0xFF6666)
+        this.time.delayedCall(400, () => {
+            hero.setTint(0XFFFFFF)
+        })
         if (this.heroHealth <= 0) {
             this.health.setTexture('hearts-0')
             this.cameras.main.shake(600, .02)
@@ -285,5 +345,8 @@ class Play extends Phaser.Scene {
                 this.health.x = 20
             }
         }
+    }
+    etc() {
+
     }
 }

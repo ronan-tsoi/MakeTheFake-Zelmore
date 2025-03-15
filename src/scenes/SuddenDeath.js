@@ -35,6 +35,13 @@ class SuddenDeath extends Phaser.Scene {
         //boss
         boss = this.physics.add.sprite(width-380, height-38, 'boss', 0).setOrigin(0,1).setScale(4)
         boss.body.setCollideWorldBounds(true)
+        //compound body
+        this.bossHead = this.physics.add.sprite(boss.x + 104, boss.y-190).setOrigin(0,1)
+        this.bossHead.setSize(240, 140)
+        boss.body.setCollideWorldBounds(true)
+        this.bossBody = this.physics.add.sprite(boss.x + 180, boss.y-84).setOrigin(0,1)
+        this.bossBody.setSize(260, 200)
+        this.bossGroup = this.add.group([this.bossHead, this.bossBody])
         this.bossVulnerable = false
         this.bossAttacking = false
         this.inRangeCheck = false
@@ -65,7 +72,7 @@ class SuddenDeath extends Phaser.Scene {
                     }
                     //this.cameras.main.shake(300, .004)
                     if (!this.bossVulnerable) {
-                        this.physics.world.overlap(hero, boss, this.landing, null, this)
+                        this.physics.world.overlap(this.heroBody, boss, this.landing, null, this)
                     }
                     //this.physics.world.overlap(hero, boss, this.landing, null, this)
                     //hero.anims.play('hero-squashed')
@@ -87,6 +94,11 @@ class SuddenDeath extends Phaser.Scene {
         //hero
         hero = this.physics.add.sprite(120, height-38, 'hero').setOrigin(0,1).setScale(4)
         hero.body.setCollideWorldBounds(true)
+        //compound body
+        this.heroBody = this.physics.add.sprite(hero.x+12, hero.y-26).setOrigin(0,1)
+        this.heroBody.setSize(56,80)
+        this.heroAttackRange = this.physics.add.sprite(hero.x+32, hero.y-18).setOrigin(0,1)
+        this.heroAttackRange.setSize(74,44)
         this.inAir = false
         this.maxJumpVelocity = false
 
@@ -132,11 +144,15 @@ class SuddenDeath extends Phaser.Scene {
         if (cursors.A.isDown) {
             this.heroX = -1
             hero.setFlipX(true)
-            hero.anims.play('hero-walk', true)
+            if (!this.attacking) {
+                hero.anims.play('hero-walk', true)
+            }
         } else if (cursors.D.isDown) {
             this.heroX = 1
             hero.setFlipX(false)
-            hero.anims.play('hero-walk', true)
+            if (!this.attacking) {
+                hero.anims.play('hero-walk', true)
+            }
         } else {
             this.heroX = 0
         }
@@ -155,11 +171,9 @@ class SuddenDeath extends Phaser.Scene {
             this.heroY += 0.1
 
             if (hero.y < 250) {
-                //this.boss.setTint(0x00FF00)
                 this.bossVulnerable = true
             }
             else {
-                //this.boss.setTint(0xFFFFFF)
                 this.bossVulnerable = false
             }
         }
@@ -183,14 +197,35 @@ class SuddenDeath extends Phaser.Scene {
         }
 
         this.physics.world.collide(hero, this.ground, this.onGround, null, this)
-        this.physics.world.overlap(hero, boss, this.inRange, null, this)
+        this.physics.world.overlap(this.heroAttackRange, this.bossGroup, this.heroAttack, null, this)
         if (!this.bossAttacking && !this.attacking) {
-            //hero.anims.play('hero-idle')
             this.inRangeCheck = false
         }
 
         hero.setVelocity(this.HERO_VELOCITY * this.heroX, this.HERO_VELOCITY * this.heroY)
+        this.heroBody.setVelocity(this.HERO_VELOCITY * this.heroX, this.HERO_VELOCITY * this.heroY)
+        this.heroAttackRange.setVelocity(this.HERO_VELOCITY * this.heroX, this.HERO_VELOCITY * this.heroY)
+        if (hero.flipX) {
+            this.heroBody.x = hero.x+40
+            this.heroAttackRange.x = hero.x+20
+            this.heroBody.y = hero.y-26
+            this.heroAttackRange.y = hero.y-18
+        } else {
+            this.heroBody.x = hero.x+12
+            this.heroAttackRange.x = hero.x+32
+            this.heroBody.y = hero.y-26
+            this.heroAttackRange.y = hero.y-18
+        }
         boss.setVelocity(this.BOSS_VELOCITY * this.bossX, this.HERO_VELOCITY * this.bossY)
+        this.bossHead.setVelocity(this.BOSS_VELOCITY * this.bossX, this.HERO_VELOCITY * this.bossY)
+        this.bossBody.setVelocity(this.BOSS_VELOCITY * this.bossX, this.HERO_VELOCITY * this.bossY)
+        if (boss.flipX) {
+            this.bossHead.x = boss.x + 216
+            this.bossBody.x = boss.x + 138
+        } else {
+            this.bossHead.x = boss.x + 104
+            this.bossBody.x = boss.x + 180
+        }
 
         if (this.fireball) {
             this.fireball.update()
@@ -204,7 +239,7 @@ class SuddenDeath extends Phaser.Scene {
         hero.y = height-36
     }
 
-    inRange() {
+    /*inRange() {
         //player attack
         if (this.bossVulnerable && this.attacking) {
             this.sound.play('hit')
@@ -238,13 +273,40 @@ class SuddenDeath extends Phaser.Scene {
                 //hero.anims.play('hero-squashed')
                 this.bossAttacking = false
             })
-        }*/
+        }
         
+    }*/
+    heroAttack() {
+        //player attack
+        if (this.attacking) {
+            hero.anims.play(`hero-attack`)
+            this.sound.play('hit')
+            this.bossHealth--
+            boss.setTint(0xFF6666)
+            this.time.delayedCall(250, () => {
+                boss.setTint(0XFFFFFF)
+            })
+            this.attacking = false
+            if (this.bossHealth == 0) {
+                this.cameras.main.shake(600, .02)
+                boss.alpha = 0
+                player = 'HERO'
+                time = (this.TIMELIMIT/1000) - Math.round(this.clock.getElapsed()/1000)
+                healthbonus = this.heroHealth*2
+                this.time.delayedCall(1000, () => {
+                    this.scene.start('gameOverScene')
+                })
+            }
+        } 
     }
     landing() {
         this.heroHealth--
         this.sound.play('stomp')
-        hero.anims.play('hero-squashed')
+        hero.anims.play('hero-squashed', true)
+        hero.setTint(0xFF6666)
+        this.time.delayedCall(400, () => {
+            hero.setTint(0XFFFFFF)
+        })
         if (this.heroHealth <= 0) {
             this.heroHeart.setTexture('heart-0')
             this.cameras.main.shake(600, .02)
