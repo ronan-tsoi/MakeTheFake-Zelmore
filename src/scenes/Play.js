@@ -5,7 +5,7 @@ class Play extends Phaser.Scene {
     init() {
         this.HERO_VELOCITY = 450
         this.BOSS_VELOCITY = 250
-        this.TIMELIMIT = 3000
+        this.TIMELIMIT = 60000
     }
     create() {
 
@@ -32,9 +32,11 @@ class Play extends Phaser.Scene {
 
         this.ground = this.physics.add.sprite(0, height, 'ground').setOrigin(0,1).setScale(4)
         this.ground.body.setImmovable(true)
+
+        this.toggleAudio = true
         
         //boss
-        boss = this.physics.add.sprite(width-380, height-38, 'boss', 0).setOrigin(0,1).setScale(4)
+        boss = this.physics.add.sprite(width, height-38, 'boss', 0).setOrigin(0,1).setScale(4)
         //compound body
         this.bossHead = this.physics.add.sprite(boss.x + 104, boss.y-190).setOrigin(0,1)
         this.bossHead.setSize(240, 140)
@@ -57,16 +59,15 @@ class Play extends Phaser.Scene {
                 this.bossAttacking = true
                 boss.anims.play('boss-attack')
                 boss.once('animationcomplete', () => {
-                    if (this.heroHealth > 1) {
-                        this.cameras.main.shake(300, .004)
-                    }
-                    //this.cameras.main.shake(300, .004)
                     if (!this.bossVulnerable) {
                         this.physics.world.overlap(this.heroBody, boss, this.landing, null, this)
                     }
+                    this.sound.play('stomp')
+                    this.cameras.main.shake(300, .004)
                     //this.physics.world.overlap(hero, boss, this.landing, null, this)
                     //hero.anims.play('hero-squashed')
                     this.bossAttacking = false
+                    boss.anims.play('boss-idle')
                 })
             }
         })
@@ -75,8 +76,11 @@ class Play extends Phaser.Scene {
             if (!this.bossAttacking) {
                 this.bossAttacking = true
                 this.fireball = new Fireball(this, boss.x, 130)
+                this.fireball.play('fireball')
+                this.sound.play('fireball')
                 this.time.delayedCall(800, () => {
                     this.bossAttacking = false
+                    boss.anims.play('boss-idle')
                 }, null, this)
             }
         })
@@ -119,41 +123,56 @@ class Play extends Phaser.Scene {
                 hero.once('animationcomplete', () => {
                     this.cooldown = false
                     this.attacking = false
-                    hero.anims.play(`hero-attack`)
-                    hero.anims.stop()
+                    hero.anims.play('hero-idle', true)
                 })
         }
         })
 
+        this.time.delayedCall(150, () => {
+            this.display = this.add.bitmapText((width/2)-1, height/2, 'upheaval', 'BATTLE!', 120, 1).setOrigin(0.5)
+            this.displayTween = this.tweens.add({
+                targets: this.display,
+                duration: 75,
+                repeat: -1,
+                yoyo: true,
+                x: (width/2) + 1
+    
+            })
+            this.time.delayedCall(100, () => {
+                this.display.alpha = 0
+                this.time.delayedCall(100, () => {
+                    this.display.alpha = 1
+                    this.time.delayedCall(100, () => {
+                        this.display.alpha = 0
+                        this.time.delayedCall(100, () => {
+                            this.display.alpha = 1
+                            this.time.delayedCall(600, () => {
+                                this.display.alpha = 0
+            })})})})})})
+
         this.clock = this.time.delayedCall(this.TIMELIMIT, () => {
+            this.toggleAudio = false
+            this.time.delayedCall(10, () => {
             this.scene.start('suddenDeathScene')
+            })
         }, null, this)
         this.timerDisplay = this.add.bitmapText(width/2, 30, 'upheaval', '', 72, 1).setOrigin(0.5)
 
-
-        //this.add.text(10, 10, 'boss scene', textConfig)
-        this.showDebugText = true
-        this.debug = this.add.text(10, 50, '', textConfig)
-        this.controls = this.add.text(width-200, 10, 'H toggle debug', {
-            fontFamily: 'Courier',
-            fontSize: '18px',
-            color: '#FFFFFF',
-            padding: {
-                top: 5,
-                bottom: 5,
-            }
+        bgm = this.sound.add('bgm-battle-main', {
+            mute: false,
+            volume: 0.75,
+            rate: 1,
+            loop: true
         })
-        this.keys = this.input.keyboard.createCursorKeys()
-        this.keys.HKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.H)
-        this.input.keyboard.on('keydown-H', function() {
-            this.showDebugText = this.showDebugText ? false : true
-            this.physics.world.drawDebug = this.physics.world.drawDebug ? false : true
-            this.physics.world.debugGraphic.clear()
-        }, this)
+        bgm.play()
 
     }
     update() {
         this.bgsky.tilePositionX += 0.2
+
+        if (!this.toggleAudio) {
+            bgm.stop()
+        }
 
         //hero controls
         if (cursors.A.isDown) {
@@ -205,6 +224,7 @@ class Play extends Phaser.Scene {
                 boss.anims.play('boss-walk', true)
             } else {
                 this.bossX = 0
+                boss.anims.play('boss-idle', true)
             }
             if (cursors.UP.isDown) {
                 this.bossX = 0
@@ -249,12 +269,6 @@ class Play extends Phaser.Scene {
         this.countdown = (this.TIMELIMIT/1000) - Math.round(this.clock.getElapsed()/1000)
         this.timerDisplay.text = this.countdown
         
-        //this.debug.text = this.bossAttacking + ' ' + this.maxJumpVelocity + ' ' + this.bossHealth + ' ' + this.heroHealth
-        if (this.showDebugText) {
-            this.debug.text = this.bossHealth + '\n' + this.heroHealth
-        } else {
-            this.debug.text = ''
-        }
     }
 
     onGround() {
@@ -262,40 +276,8 @@ class Play extends Phaser.Scene {
         this.maxJumpVelocity = false
         this.heroY = 0
         hero.y = height-36
-        //this.heroBody.y = hero.y-26
-        //this.heroAttackRange.y = hero.y-18
     }
 
-    /*inRange() {
-        //player attack
-        if (this.bossVulnerable && this.attacking) {
-            this.sound.play('hit')
-            this.bossHealth--
-            this.attacking = false
-            if (this.bossHealth == 0) {
-                this.cameras.main.shake(600, .02)
-                boss.alpha = 0
-                player = 'HERO'
-                time = (this.TIMELIMIT/1000) - Math.round(this.clock.getElapsed()/1000)
-                healthbonus = this.heroHealth*2
-                this.time.delayedCall(1000, () => {
-                    this.scene.start('gameOverScene')
-                })
-            }
-        } 
-        //boss attack
-        if (!this.bossVulnerable && !this.bossAttacking) {
-            this.bossAttacking = true
-            boss.anims.play('boss-attack')
-            boss.once('animationcomplete', () => {
-                this.cameras.main.shake(300, .004)
-                this.physics.world.overlap(hero, boss, this.landing, null, this)
-                //hero.anims.play('hero-squashed')
-                this.bossAttacking = false
-            })
-        }
-        
-    }*/
     heroAttack() {
         //player attack
         if (this.attacking) {
@@ -308,45 +290,49 @@ class Play extends Phaser.Scene {
             })
             this.attacking = false
             if (this.bossHealth == 0) {
+                this.sound.play('defeat')
                 this.cameras.main.shake(600, .02)
                 boss.alpha = 0
                 player = 'HERO'
                 time = (this.TIMELIMIT/1000) - Math.round(this.clock.getElapsed()/1000)
                 healthbonus = this.heroHealth*2
-                this.time.delayedCall(1000, () => {
+                this.toggleAudio = false
+                this.time.delayedCall(1500, () => {
                     this.scene.start('gameOverScene')
                 })
+            } else {
+                this.cameras.main.shake(100, .004)
             }
         } 
     }
     landing() {
         this.heroHealth--
-        this.sound.play('stomp')
+        this.sound.play('hit')
         hero.anims.play('hero-squashed', true)
         hero.setTint(0xFF6666)
         this.time.delayedCall(400, () => {
             hero.setTint(0XFFFFFF)
         })
         if (this.heroHealth <= 0) {
+            this.sound.play('defeat')
             this.health.setTexture('hearts-0')
             this.cameras.main.shake(600, .02)
             hero.alpha = 0
             player = 'BOSS'
             time = (this.TIMELIMIT/1000) - Math.round(this.clock.getElapsed()/1000)
             healthbonus = this.bossHealth
-            this.time.delayedCall(1000, () => {
+            this.toggleAudio = false
+            this.time.delayedCall(1500, () => {
                 this.scene.start('gameOverScene')
             })
         }
         else {
+            this.cameras.main.shake(300, .004)
             this.health.setTexture('hearts-'+this.heroHealth)
             if (this.heroHealth == 1) {
                 this.lowHealthTween.restart()
                 this.health.x = 20
             }
         }
-    }
-    etc() {
-
     }
 }

@@ -22,9 +22,9 @@ class Fireball extends Phaser.Physics.Arcade.Sprite {
     }
     update() {
         if (this.direction) {
-            this.x += 8
+            this.x += 10
         } else {
-            this.x -= 8
+            this.x -= 10
         }
 
         this.parentScene.physics.world.overlap(this.parentScene.heroBody, this, this.hit, null, this)

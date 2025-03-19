@@ -12,10 +12,10 @@ let config = {
     physics: {
         default: 'arcade',
         arcade: {
-            debug: true
+            debug: false
         }
     },
-    scene: [ Load , Title , Play , GameOver, Credits, SuddenDeath]
+    scene: [ Load , Title , Play , GameOver, Credits, SuddenDeath, Tutorial]
 }
 
 let game = new Phaser.Game(config)
@@ -30,14 +30,5 @@ let boss
 let player
 let time
 let healthbonus
-
-let textConfig = {
-    fontFamily: 'Courier',
-    fontSize: '28px',
-    color: '#FFFFFF',
-    padding: {
-        top: 5,
-        bottom: 5,
-    }
-}
+let bgm
 

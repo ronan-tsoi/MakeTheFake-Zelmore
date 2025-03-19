@@ -31,9 +31,11 @@ class SuddenDeath extends Phaser.Scene {
 
         this.ground = this.physics.add.sprite(0, height, 'ground').setOrigin(0,1).setScale(4)
         this.ground.body.setImmovable(true)
+
+        this.toggleAudio = true
         
         //boss
-        boss = this.physics.add.sprite(width-380, height-38, 'boss', 0).setOrigin(0,1).setScale(4)
+        boss = this.physics.add.sprite(width, height-38, 'boss', 0).setOrigin(0,1).setScale(4)
         boss.body.setCollideWorldBounds(true)
         //compound body
         this.bossHead = this.physics.add.sprite(boss.x + 104, boss.y-190).setOrigin(0,1)
@@ -67,15 +69,11 @@ class SuddenDeath extends Phaser.Scene {
                 this.bossAttacking = true
                 boss.anims.play('boss-attack')
                 boss.once('animationcomplete', () => {
-                    if (this.heroHealth > 1) {
-                        this.cameras.main.shake(300, .004)
-                    }
-                    //this.cameras.main.shake(300, .004)
                     if (!this.bossVulnerable) {
                         this.physics.world.overlap(this.heroBody, boss, this.landing, null, this)
                     }
-                    //this.physics.world.overlap(hero, boss, this.landing, null, this)
-                    //hero.anims.play('hero-squashed')
+                    this.sound.play('stomp')
+                    this.cameras.main.shake(300, .004)
                     this.bossAttacking = false
                 })
             }
@@ -85,8 +83,11 @@ class SuddenDeath extends Phaser.Scene {
             if (!this.bossAttacking) {
                 this.bossAttacking = true
                 this.fireball = new Fireball(this, boss.x, 130)
+                this.fireball.play('fireball')
+                this.sound.play('fireball')
                 this.time.delayedCall(800, () => {
                     this.bossAttacking = false
+                    boss.anims.play('boss-idle')
                 }, null, this)
             }
         })
@@ -128,17 +129,57 @@ class SuddenDeath extends Phaser.Scene {
                 hero.once('animationcomplete', () => {
                     this.cooldown = false
                     this.attacking = false
-                    hero.anims.play(`hero-attack`)
-                    hero.anims.stop()
+                    hero.anims.play('hero-idle', true)
                 })
         }
         })
 
-        this.display = this.add.bitmapText(width/2, 30, 'upheaval', 'SUDDEN DEATH!', 72, 1).setOrigin(0.5)
+        this.time.delayedCall(150, () => {
+            this.display = this.add.bitmapText((width/2)-1, height/2, 'upheaval', 'SUDDEN DEATH!', 100, 1).setOrigin(0.5)
+            this.displayTween = this.tweens.add({
+                targets: this.display,
+                duration: 75,
+                repeat: -1,
+                yoyo: true,
+                x: (width/2) + 1
+    
+            })
+            this.time.delayedCall(100, () => {
+                this.display.alpha = 0
+                this.time.delayedCall(100, () => {
+                    this.display.alpha = 1
+                    this.time.delayedCall(100, () => {
+                        this.display.alpha = 0
+                        this.time.delayedCall(100, () => {
+                            this.display.alpha = 1
+                            this.time.delayedCall(600, () => {
+                                this.display.alpha = 0
+                                this.display = this.add.bitmapText((width/2)-1, 30, 'upheaval', 'SUDDEN DEATH!', 72, 1).setOrigin(0.5)
+                                this.displayTween = this.tweens.add({
+                                    targets: this.display,
+                                    duration: 75,
+                                    repeat: -1,
+                                    yoyo: true,
+                                    x: (width/2) + 1
+                        
+                                })
+            })})})})})})
+
+        bgm = this.sound.add('bgm-sudden-death', {
+            mute: false,
+            volume: 0.75,
+            rate: 1,
+            loop: true
+        })
+        bgm.play()
 
     }
     update() {
         this.bgsky.tilePositionX -= 0.2
+
+        if (!this.toggleAudio) {
+            bgm.stop()
+        }
 
         //hero controls
         if (cursors.A.isDown) {
@@ -190,6 +231,7 @@ class SuddenDeath extends Phaser.Scene {
                 boss.anims.play('boss-walk', true)
             } else {
                 this.bossX = 0
+                boss.anims.play('boss-idle', true)
             }
             if (cursors.UP.isDown) {
                 this.bossX = 0
@@ -239,43 +281,6 @@ class SuddenDeath extends Phaser.Scene {
         hero.y = height-36
     }
 
-    /*inRange() {
-        //player attack
-        if (this.bossVulnerable && this.attacking) {
-            this.sound.play('hit')
-            this.bossHealth--
-            this.attacking = false
-            if (this.bossHealth == 0) {
-                this.bossHeart.setTexture('heart-0')
-                this.cameras.main.shake(600, .02)
-                boss.alpha = 0
-                player = 'HERO'
-                time = 1
-                healthbonus = this.heroHealth
-                this.time.delayedCall(1000, () => {
-                    this.scene.start('gameOverScene')
-                })
-            }
-        } else {
-            this.bossHeart.setTexture('heart-'+this.bossHealth)
-            if (this.bossHealth == 1) {
-                this.bossLowHealthTween.restart()
-                this.bossHeart.x = width-20
-            }
-        }
-        //boss attack
-        /*if (!this.bossVulnerable && !this.bossAttacking) {
-            this.bossAttacking = true
-            boss.anims.play('boss-attack')
-            boss.once('animationcomplete', () => {
-                this.cameras.main.shake(300, .004)
-                this.physics.world.overlap(hero, boss, this.landing, null, this)
-                //hero.anims.play('hero-squashed')
-                this.bossAttacking = false
-            })
-        }
-        
-    }*/
     heroAttack() {
         //player attack
         if (this.attacking) {
@@ -288,37 +293,50 @@ class SuddenDeath extends Phaser.Scene {
             })
             this.attacking = false
             if (this.bossHealth == 0) {
+                this.sound.play('defeat')
+                this.bossHeart.setTexture('heart-0')
                 this.cameras.main.shake(600, .02)
                 boss.alpha = 0
                 player = 'HERO'
-                time = (this.TIMELIMIT/1000) - Math.round(this.clock.getElapsed()/1000)
-                healthbonus = this.heroHealth*2
-                this.time.delayedCall(1000, () => {
+                time = 1
+                healthbonus = this.heroHealth
+                this.toggleAudio = false
+                this.time.delayedCall(1500, () => {
                     this.scene.start('gameOverScene')
                 })
+            } else {
+                this.cameras.main.shake(100, .004)
+                this.bossHeart.setTexture('heart-'+this.bossHealth)
+                if (this.bossHealth == 1) {
+                    this.bossLowHealthTween.restart()
+                    this.bossHeart.x = width-20
+                }
             }
         } 
     }
     landing() {
         this.heroHealth--
-        this.sound.play('stomp')
+        this.sound.play('hit')
         hero.anims.play('hero-squashed', true)
         hero.setTint(0xFF6666)
         this.time.delayedCall(400, () => {
             hero.setTint(0XFFFFFF)
         })
         if (this.heroHealth <= 0) {
+            this.sound.play('defeat')
             this.heroHeart.setTexture('heart-0')
             this.cameras.main.shake(600, .02)
             hero.alpha = 0
             player = 'BOSS'
             time = 1
             healthbonus = this.bossHealth
-            this.time.delayedCall(1000, () => {
+            this.toggleAudio = false
+            this.time.delayedCall(1500, () => {
                 this.scene.start('gameOverScene')
             })
         }
         else {
+            this.cameras.main.shake(300, .004)
             this.heroHeart.setTexture('heart-'+this.heroHealth)
             if (this.heroHealth == 1) {
                 this.heroLowHealthTween.restart()

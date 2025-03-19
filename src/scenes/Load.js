@@ -14,6 +14,15 @@ class Load extends Phaser.Scene {
             frameHeight: 19
         })
 
+        this.load.spritesheet('hero-tut', './assets/img/hero-tut.png', {
+            frameWidth: 50,
+            frameHeight: 74
+        })
+        this.load.spritesheet('boss-tut', './assets/img/boss-tut.png', {
+            frameWidth: 79,
+            frameHeight: 79
+        })
+
         this.load.image('sky', './assets/img/bg-sky.png')
         this.load.image('trees', './assets/img/bg-sky-treesonly.png')
         this.load.image('walls', './assets/img/bg-walls.png')
@@ -26,7 +35,10 @@ class Load extends Phaser.Scene {
             frameWidth: 88,
             frameHeight: 77
         })
-        this.load.image('fireball', './assets/img/fireball.png')
+        this.load.spritesheet('fireball', './assets/img/fireball.png', {
+            frameWidth: 20,
+            frameHeight: 10,
+        })
 
         this.load.image('hearts-0', './assets/img/hearts-0.png')
         this.load.image('hearts-1', './assets/img/hearts-1.png')
@@ -43,6 +55,15 @@ class Load extends Phaser.Scene {
         this.load.audio('attack', './assets/audio/attack.wav')
         this.load.audio('stomp', './assets/audio/stomp.wav')
         this.load.audio('hit', './assets/audio/hit.wav')
+        this.load.audio('defeat', './assets/audio/defeat.wav')
+        this.load.audio('fireball', './assets/audio/fireball.wav')
+        this.load.audio('bgm-title', './assets/audio/bgm-title.wav')
+        this.load.audio('bgm-battle-main', './assets/audio/bgm-battle-main.wav')
+        this.load.audio('bgm-sudden-death', './assets/audio/bgm-sudden-death.wav')
+        this.load.audio('ui-click', './assets/audio/ui-click.wav')
+        this.load.audio('ui-play', './assets/audio/ui-play.wav')
+        this.load.audio('score-reveal', './assets/audio/score-reveal.wav')
+
 
         this.load.bitmapFont('upheaval', './assets/font/Upheaval.png', './assets/font/Upheaval.xml')
         this.load.bitmapFont('gem', './assets/font/gem.png', './assets/font/gem.xml')
@@ -66,6 +87,22 @@ class Load extends Phaser.Scene {
             })
         })
         this.anims.create({
+            key: 'boss-idle',
+            frameRate: 2,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('boss', {
+                frames: [0,4]
+            })
+        })
+        this.anims.create({
+            key: 'fireball',
+            frameRate: 8,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('fireball', {
+                frames: [0,1,2,3]
+            })
+        })
+        this.anims.create({
             key: 'hero-attack',
             frameRate: 8,
             repeat: 0,
@@ -83,10 +120,10 @@ class Load extends Phaser.Scene {
         })
         this.anims.create({
             key: 'hero-idle',
-            frameRate: 8,
-            repeat: 0,
+            frameRate: 2,
+            repeat: -1,
             frames: this.anims.generateFrameNumbers('hero', {
-                frames: [0]
+                frames: [0,7]
             })
         })
         this.anims.create({
@@ -97,12 +134,29 @@ class Load extends Phaser.Scene {
                 frames: [4,4,5,6,6,0]
             })
         })
+
         this.anims.create({
             key: 'cue-blink',
             frameRate: 10,
             repeat: 2,
             frames: this.anims.generateFrameNumbers('start-cue', {
                 frames: [0,1]
+            })
+        })
+        this.anims.create({
+            key: 'hero-tut',
+            frameRate: 2,
+            repeat: 0,
+            frames: this.anims.generateFrameNumbers('hero-tut', {
+                frames: [0,0,1,1,2,2]
+            })
+        })
+        this.anims.create({
+            key: 'boss-tut',
+            frameRate: 2,
+            repeat: 0,
+            frames: this.anims.generateFrameNumbers('boss-tut', {
+                frames: [0,0,1,1,2,2]
             })
         })
 

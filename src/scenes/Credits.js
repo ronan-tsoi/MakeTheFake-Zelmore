@@ -29,9 +29,11 @@ class Credits extends Phaser.Scene {
     }
     update() {
         if (cursors.LEFT.isDown) {
+            this.sound.play('ui-click')
             this.scene.start('gameOverScene')
         }
         if (cursors.RIGHT.isDown) {
+            this.sound.play('ui-click')
             this.scene.start('titleScene')
         }
     }
