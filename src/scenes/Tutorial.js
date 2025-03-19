@@ -23,7 +23,6 @@ class Tutorial extends Phaser.Scene {
         })
 
         //bg
-        //this.bgsky = this.add.sprite(0,height, 'title-0').setOrigin(0,1)
         this.bgsky = this.add.tileSprite(0,height, 864, 384, 'title-0').setOrigin(0,1)
         this.bgmountains = this.add.sprite(0,height, 'title-1').setOrigin(0,1)
         this.bgtrees = this.add.sprite(0, height, 'trees').setOrigin(0,1).setScale(4)
@@ -46,7 +45,6 @@ class Tutorial extends Phaser.Scene {
         this.bossHealth = 12
         this.bossVulnerable = false
         this.bossAttacking = false
-        //boss.play('boss-stomp')
         this.inRangeCheck = false
 
         this.bossX = 0
@@ -97,7 +95,6 @@ class Tutorial extends Phaser.Scene {
         this.heroX = 0
         this.heroY = 0
 
-        //this.health = this.add.sprite(20,20, 'hearts-6').setOrigin(0,0).setScale(4)
         this.heroHealth = 6
         this.lowHealthTween = this.tweens.add({
             targets: this.health,
@@ -137,6 +134,7 @@ class Tutorial extends Phaser.Scene {
             })
         }, this)
 
+        //possibly the ugliest chunk of code i have ever written..
         this.time.delayedCall(750, () => {
             this.tutorial = this.add.sprite(width/2, 20, 'hero-tut', 0).setScale(4).setOrigin(0.5,0)
             this.tutorial.play('hero-tut')
@@ -271,8 +269,6 @@ class Tutorial extends Phaser.Scene {
         if (this.fireball) {
             this.fireball.update()
         }
-
-        // skip/continue
     }
 
     onGround() {

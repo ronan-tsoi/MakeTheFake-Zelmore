@@ -24,7 +24,6 @@ class Play extends Phaser.Scene {
         })
 
         //bg
-        //this.bgsky = this.add.sprite(0,height, 'title-0').setOrigin(0,1)
         this.bgsky = this.add.tileSprite(0,height, 864, 384, 'title-0').setOrigin(0,1)
         this.bgmountains = this.add.sprite(0,height, 'title-1').setOrigin(0,1)
         this.bgtrees = this.add.sprite(0, height, 'trees').setOrigin(0,1).setScale(4)
@@ -47,7 +46,6 @@ class Play extends Phaser.Scene {
         this.bossHealth = 12
         this.bossVulnerable = false
         this.bossAttacking = false
-        //boss.play('boss-stomp')
         this.inRangeCheck = false
 
         this.bossX = 0

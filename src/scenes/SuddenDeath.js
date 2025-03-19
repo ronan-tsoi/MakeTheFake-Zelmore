@@ -23,7 +23,6 @@ class SuddenDeath extends Phaser.Scene {
         })
 
         //bg
-        //this.bgsky = this.add.sprite(0,height, 'title-0').setOrigin(0,1)
         this.bgsky = this.add.tileSprite(0,height, 864, 384, 'title-0').setOrigin(0,1)
         this.bgmountains = this.add.sprite(0,height, 'title-1').setOrigin(0,1)
         this.bgtrees = this.add.sprite(0, height, 'trees').setOrigin(0,1).setScale(4)

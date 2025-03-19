@@ -5,7 +5,6 @@ class GameOver extends Phaser.Scene {
     create() {
         this.bgtrees = this.add.sprite(42, height+100, 'trees').setOrigin(0,1).setScale(4)
 
-        //this.add.text(width/4, height/2, 'GAME OVER\n(statistics here)\nspace to restart\n<- title\n-> credits (not implemented)', textConfig)
         cursors = this.input.keyboard.addKeys(
             {
             SPACE:Phaser.Input.Keyboard.KeyCodes.SPACE,
@@ -13,8 +12,6 @@ class GameOver extends Phaser.Scene {
             RIGHT:Phaser.Input.Keyboard.KeyCodes.RIGHT,
         })
         keySPACE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
-
-        //this.add.text(width/4, height/3, time + ' ' + healthbonus)
 
         this.toggleContinue = false
 
@@ -52,7 +49,6 @@ class GameOver extends Phaser.Scene {
         })
         this.time.delayedCall(4250, () => {
             if (!this.toggleContinue) {
-                //this.line4 = this.add.bitmapText(width/2, 288, 'upheaval', '', 96, 1).setOrigin(0.5)
                 if (time * healthbonus * 10 > 1500) {
                     this.bigNumber = true
                     this.roll = 1

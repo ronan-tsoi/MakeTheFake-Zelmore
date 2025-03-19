@@ -3,7 +3,6 @@ class Title extends Phaser.Scene {
         super('titleScene')
     }
     create() {
-        //this.add.text(width/2, height/2, 'SPACE to start', textConfig)
         keySPACE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
 
         this.bg0 = this.add.tileSprite(0,height, 864, 384, 'title-0').setOrigin(0,1)

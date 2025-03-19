@@ -1,3 +1,20 @@
+/*
+Phaser components:
+- Physics system
+- Camera system
+- Animation manager
+- Tweening manager
+- Timer
+
+Music/SFX from OGA:
+https://opengameart.org/content/4-chiptunes-adventure
+https://opengameart.org/content/5-chiptunes-action
+https://opengameart.org/content/rpg-sound-pack
+https://opengameart.org/content/menu-sound-effects
+https://opengameart.org/content/spell-4-fire
+https://opengameart.org/content/2-high-quality-explosions
+*/
+
 let config = {
     type: Phaser.AUTO,
     // scale x4
